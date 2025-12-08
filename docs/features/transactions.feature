@@ -10,6 +10,8 @@ Feature: Money Transactions
       And the account balance should be updated accordingly
 
       Examples:
-        | account_type | amount |
-        | checking     | 500    |
-        | savings      | 1000   |
+        | account_type | amount  |
+        | checking     | 500     |
+        | savings      | 1000    |
+        | checking     | 10.50   |
+        | savings      | 2500.75 |
