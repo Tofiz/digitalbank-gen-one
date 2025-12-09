@@ -9,21 +9,10 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 public class DriverInitializer {
-    public static WebDriver initChrome() {
-        return initDriver(BrowserType.CHROME_SELMGR);
-    }
 
-    public static WebDriver initFirefox() {
-        return initDriver(BrowserType.FIREFOX_SELMGR);
-    }
-
-    public static WebDriver initEdge() {
-        return initDriver(BrowserType.EDGE_SELMGR);
-    }
-
-    private static WebDriver initDriver(BrowserType browserType) {
+    public static WebDriver getDriver(BrowserType browserType) {
         switch (browserType) {
-            case CHROME_SELMGR -> {
+            case CHROME_SELMGR: {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--incognito");
                 options.addArguments("--disable-blink-features=AutomationControlled");
@@ -32,7 +21,7 @@ public class DriverInitializer {
 
                 return new ChromeDriver(options);
             }
-            case FIREFOX_SELMGR -> {
+            case FIREFOX_SELMGR: {
                 FirefoxOptions options = new FirefoxOptions();
                 options.addArguments("--private");
                 options.addArguments("--disable-blink-features=AutomationControlled");
@@ -41,7 +30,7 @@ public class DriverInitializer {
 
                 return new FirefoxDriver(options);
             }
-            case EDGE_SELMGR -> {
+            case EDGE_SELMGR: {
                 EdgeOptions options = new EdgeOptions();
                 options.addArguments("--inprivate");
                 options.addArguments("--disable-blink-features=AutomationControlled");
@@ -50,7 +39,8 @@ public class DriverInitializer {
 
                 return new EdgeDriver(options);
             }
-            default -> throw new IllegalArgumentException("Invalid browser type");
+            default:
+                throw new IllegalArgumentException("Invalid browser type: " + browserType);
         }
     }
 }
