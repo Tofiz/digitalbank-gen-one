@@ -1,3 +1,4 @@
+@profile
 Feature: Profile management
 
   Rule: A logged-in user can update their profile information

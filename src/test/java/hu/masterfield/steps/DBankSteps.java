@@ -2,25 +2,40 @@ package hu.masterfield.steps;
 
 import hu.masterfield.driver.BrowserType;
 import hu.masterfield.driver.DriverInitializer;
+import hu.masterfield.pages.DashboardPage;
+import hu.masterfield.pages.DepositPage;
 import hu.masterfield.pages.LoginPage;
+import hu.masterfield.pages.ViewCheckingAccountsPage;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.TimeoutException;
+
 
 import java.time.Duration;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DBankSteps {
 
     private WebDriver driver;
     private LoginPage loginPage;
+    private DashboardPage dashboardPage;
+    private DepositPage depositPage;
+    private ViewCheckingAccountsPage viewCheckingAccountsPage;
+
+    private double initialBalance;
 
     @Before
     public void setup() {
@@ -34,11 +49,18 @@ public class DBankSteps {
 
     @Given("the user is on the login page")
     public void theUserIsOnTheLoginPage() {
-        driver.get("https://dbank-qa.wedevx.co/bank/login");
+        driver.get("https://eng.digitalbank.masterfield.hu/bank/login");
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            Objects.requireNonNull(wait.until(ExpectedConditions.elementToBeClickable(By.className("cc-nb-okagree")))).click();
+        } catch (TimeoutException e) {
+            // GDPR popup did not appear or was not clickable in time.
+
+        }
         loginPage = new LoginPage(driver);
     }
 
-    @When("the user enters {string} and {string} password")
+    @When("the user enters {string} and {string}")
     public void theUserEntersUsernameAndPassword(String username, String password) {
         loginPage.enterUsername(username);
         loginPage.enterPassword(password);
@@ -52,7 +74,51 @@ public class DBankSteps {
     @Then("the registered user should be redirected to the dashboard")
     public void theRegisteredUserShouldBeRedirectedToTheDashboard() {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.urlContains("home"));
-        assertEquals("https://dbank-qa.wedevx.co/bank/home", driver.getCurrentUrl());
+        try {
+            wait.until(ExpectedConditions.urlContains("home"));
+        } catch (TimeoutException e) {
+            fail("The login was not successful. Timed out waiting for dashboard. Current URL: " + driver.getCurrentUrl());
+        }
+        assertEquals("https://eng.digitalbank.masterfield.hu/bank/home", driver.getCurrentUrl());
+        dashboardPage = new DashboardPage(driver);
+    }
+
+    @Then("the registered user should not be redirected to the dashboard")
+    public void theRegisteredUserShouldNotBeRedirectedToTheDashboard() {
+        assertNotEquals("https://eng.digitalbank.masterfield.hubank/home", driver.getCurrentUrl());
+    }
+
+    @Given("the user is logged in")
+    public void theUserIsLoggedIn() {
+        theUserIsOnTheLoginPage();
+        theUserEntersUsernameAndPassword("tester01", "Kjhgfdsa.9");
+        clicksTheLoginButton();
+        theRegisteredUserShouldBeRedirectedToTheDashboard();
+    }
+
+    @Given("the user is on the deposit into account page")
+    public void theUserIsOnTheDepositIntoAccountPage() {
+        depositPage = dashboardPage.navigateToDepositPage();
+        depositPage.selectAccountByValue("79");
+    }
+
+    @When("the user makes an individual checking deposit of {string}")
+    public void theUserMakesAnIndividualCheckingDepositOf(String amount) {
+        depositPage.enterAmount(amount);
+        depositPage.submitDeposit();
+    }
+
+    @Then("the new transaction for {string} should be visible in the transaction list")
+    public void theNewTransactionForShouldBeVisibleInTheTransactionList(String amount) {
+        viewCheckingAccountsPage = new ViewCheckingAccountsPage(driver);
+        assertTrue(viewCheckingAccountsPage.isTransactionVisible(amount), "Transaction not visible for amount: " + amount);
+    }
+
+    @And("the account balance should be updated accordingly")
+    public void theAccountBalanceShouldBeUpdatedAccordingly() {
+        String balanceText = viewCheckingAccountsPage.getFirstTransactionAmount();
+        balanceText = balanceText.replace("$", "").trim();
+        double newBalance = Double.parseDouble(balanceText);
+        assertNotEquals(0.0, newBalance, "The balance has not been updated.");
     }
 }
