@@ -2,11 +2,7 @@ package hu.masterfield.steps;
 
 import hu.masterfield.driver.BrowserType;
 import hu.masterfield.driver.DriverInitializer;
-import hu.masterfield.pages.DashboardPage;
-import hu.masterfield.pages.DepositPage;
-import hu.masterfield.pages.LoginPage;
-import hu.masterfield.pages.ProfilePage;
-import hu.masterfield.pages.ViewCheckingAccountsPage;
+import hu.masterfield.pages.*;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -37,6 +33,7 @@ public class DBankSteps {
     private DepositPage depositPage;
     private ViewCheckingAccountsPage viewCheckingAccountsPage;
     private ProfilePage profilePage;
+    private WithdrawPage withdrawPage;
 
     private double initialBalance;
 
@@ -136,5 +133,15 @@ public class DBankSteps {
     @Then("a success message {string} is displayed")
     public void aSuccessMessageIsDisplayed(String message) {
         assertEquals(message, profilePage.getSuccessMessage());
+    }
+
+    @Given("the user is on the withdraw from account page")
+    public void theUserIsOnTheWithdrawFromAccountPage() {
+        withdrawPage = dashboardPage.navigateToWithdrawPage();
+    }
+
+    @When("the user makes an individual cheking withdraw of {string}")
+    public void theUserMakesAnIndividualChekingWithdrawOf(String amount) {
+        withdrawPage.createWithdraw(amount);
     }
 }

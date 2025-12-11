@@ -12,5 +12,5 @@ Feature: withdraw transaction
 
       Examples:
         | amount  |
-        | 500     |
+        | 50     |
         | 10.50   |

@@ -14,6 +14,9 @@ public class DashboardPage {
     @FindBy(id = "deposit-menu-item")
     private WebElement depositLink;
 
+    @FindBy(id = "withdraw-menu-item")
+    private WebElement withdrawLink;
+
     public DashboardPage(WebDriver driver, WebDriverWait wait) {
         this.driver = driver;
         this.wait = wait;
@@ -23,5 +26,10 @@ public class DashboardPage {
     public DepositPage navigateToDepositPage() {
         depositLink.click();
         return new DepositPage(driver, wait);
+    }
+
+    public WithdrawPage navigateToWithdrawPage() {
+        withdrawLink.click();
+        return new WithdrawPage(driver);
     }
 }
