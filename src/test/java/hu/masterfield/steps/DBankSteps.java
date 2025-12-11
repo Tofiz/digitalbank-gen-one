@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class DBankSteps {
 
     private WebDriver driver;
+    private WebDriverWait wait;
     private LoginPage loginPage;
     private DashboardPage dashboardPage;
     private DepositPage depositPage;
@@ -40,6 +41,7 @@ public class DBankSteps {
     @Before
     public void setup() {
         driver = DriverInitializer.getDriver(BrowserType.CHROME_SELMGR);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     }
 
     @After
@@ -51,7 +53,6 @@ public class DBankSteps {
     public void theUserIsOnTheLoginPage() {
         driver.get("https://eng.digitalbank.masterfield.hu/bank/login");
         try {
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
             Objects.requireNonNull(wait.until(ExpectedConditions.elementToBeClickable(By.className("cc-nb-okagree")))).click();
         } catch (TimeoutException e) {
             // GDPR popup did not appear or was not clickable in time.
@@ -73,14 +74,13 @@ public class DBankSteps {
 
     @Then("the registered user should be redirected to the dashboard")
     public void theRegisteredUserShouldBeRedirectedToTheDashboard() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         try {
             wait.until(ExpectedConditions.urlContains("home"));
         } catch (TimeoutException e) {
             fail("The login was not successful. Timed out waiting for dashboard. Current URL: " + driver.getCurrentUrl());
         }
         assertEquals("https://eng.digitalbank.masterfield.hu/bank/home", driver.getCurrentUrl());
-        dashboardPage = new DashboardPage(driver);
+        dashboardPage = new DashboardPage(driver, wait);
     }
 
     @Then("the registered user should not be redirected to the dashboard")
@@ -99,13 +99,11 @@ public class DBankSteps {
     @Given("the user is on the deposit into account page")
     public void theUserIsOnTheDepositIntoAccountPage() {
         depositPage = dashboardPage.navigateToDepositPage();
-        depositPage.selectAccountByValue("79");
     }
 
     @When("the user makes an individual checking deposit of {string}")
     public void theUserMakesAnIndividualCheckingDepositOf(String amount) {
-        depositPage.enterAmount(amount);
-        depositPage.submitDeposit();
+        depositPage.createDeposit(amount);
     }
 
     @Then("the new transaction for {string} should be visible in the transaction list")

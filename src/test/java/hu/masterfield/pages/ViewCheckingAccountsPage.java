@@ -18,7 +18,7 @@ public class ViewCheckingAccountsPage {
     @FindBy(xpath = "//div[@id='firstRow']/div/div")
     private WebElement firstTransaction;
 
-    @FindBy(xpath = "//div[@id='firstRow']/div/div/following-sibling::div[3]")
+    @FindBy(xpath = "//*[@id=\"transactionTable\"]/tbody/tr[1]/td[4]")
     private WebElement firstTransactionAmount;
 
     @FindBy(xpath = "//a[contains(text(),'View Checking')]")
