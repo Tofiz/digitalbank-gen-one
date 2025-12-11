@@ -5,6 +5,7 @@ import hu.masterfield.driver.DriverInitializer;
 import hu.masterfield.pages.DashboardPage;
 import hu.masterfield.pages.DepositPage;
 import hu.masterfield.pages.LoginPage;
+import hu.masterfield.pages.ProfilePage;
 import hu.masterfield.pages.ViewCheckingAccountsPage;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -35,6 +36,7 @@ public class DBankSteps {
     private DashboardPage dashboardPage;
     private DepositPage depositPage;
     private ViewCheckingAccountsPage viewCheckingAccountsPage;
+    private ProfilePage profilePage;
 
     private double initialBalance;
 
@@ -118,5 +120,21 @@ public class DBankSteps {
         balanceText = balanceText.replace("$", "").trim();
         double newBalance = Double.parseDouble(balanceText);
         assertNotEquals(0.0, newBalance, "The balance has not been updated.");
+    }
+
+    @And("the user is on the profile page")
+    public void theUserIsOnTheProfilePage() {
+        driver.get("https://eng.digitalbank.masterfield.hu/bank/user/profile");
+        profilePage = new ProfilePage(driver);
+    }
+
+    @When("the user updates their title to {string}, first name to {string} and last name to {string}")
+    public void theUserUpdatesTheirTitleToFirstNameToAndLastNameTo(String title, String firstName, String lastName) {
+        profilePage.updateProfile(title, firstName, lastName);
+    }
+
+    @Then("a success message {string} is displayed")
+    public void aSuccessMessageIsDisplayed(String message) {
+        assertEquals(message, profilePage.getSuccessMessage());
     }
 }
