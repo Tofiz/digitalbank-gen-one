@@ -1,5 +1,5 @@
 @withdraw
-Feature: withdraw transaction
+Feature: Withdraw transaction
 
   Rule: A user can withdraw amount from their accounts
 

@@ -5,17 +5,19 @@ import hu.masterfield.driver.DriverInitializer;
 import hu.masterfield.pages.*;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import io.qameta.allure.Allure;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.TimeoutException;
 
 
+import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.util.Objects;
 
@@ -44,7 +46,10 @@ public class DBankSteps {
     }
 
     @After
-    public void cleanup() {
+    public void cleanup(Scenario scenario) {
+        if (scenario.isFailed()) {
+            Allure.addAttachment("Screenshot", new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
+        }
         driver.quit();
     }
 
