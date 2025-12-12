@@ -1,5 +1,9 @@
 package hu.masterfield.steps;
 
+import com.galenframework.api.Galen;
+import com.galenframework.reports.GalenTestInfo;
+import com.galenframework.reports.HtmlReportBuilder;
+import com.galenframework.reports.model.LayoutReport;
 import hu.masterfield.driver.BrowserType;
 import hu.masterfield.driver.DriverInitializer;
 import hu.masterfield.pages.*;
@@ -18,7 +22,11 @@ import org.openqa.selenium.TimeoutException;
 
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -148,5 +156,22 @@ public class DBankSteps {
     @When("the user makes an individual cheking withdraw of {string}")
     public void theUserMakesAnIndividualChekingWithdrawOf(String amount) {
         withdrawPage.createWithdraw(amount);
+    }
+
+    @Then("the user checks the layout of the dashboard")
+    public void theUserChecksTheLayoutOfTheDashboard() throws IOException {
+        LayoutReport layoutReport = Galen.checkLayout(driver, "src/test/resources/specs/dashboard.gspec", Collections.singletonList("desktop"));
+
+        List<GalenTestInfo> tests = new LinkedList<>();
+        GalenTestInfo test = GalenTestInfo.fromString("Dashboard layout");
+        test.getReport().layout(layoutReport, "Check dashboard layout");
+        tests.add(test);
+
+        String reportPath = "target/galen-html-reports";
+        new HtmlReportBuilder().build(tests, reportPath);
+
+        if (layoutReport.errors() > 0) {
+            fail("Layout test failed. Found " + layoutReport.errors() + " errors. See report at: " + reportPath);
+        }
     }
 }
